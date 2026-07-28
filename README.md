@@ -1,5 +1,7 @@
 # RAG Assistant
 
+![CI](https://github.com/Jesus1508/RAG_Assistant/actions/workflows/ci.yml/badge.svg)
+
 Asistente interno con Retrieval-Augmented Generation **100% local**: embeddings
 y generación de texto corren sobre [Ollama](https://ollama.com) en tu propia
 máquina, sin depender de OpenAI, Cohere ni ninguna API de pago. El asistente
@@ -9,22 +11,30 @@ respuesta en vez de inventarla.
 
 ## Stack
 
-- **Backend**: Node.js, Express, [Ollama](https://ollama.com) (embeddings +
-  generación local), búsqueda vectorial por similitud coseno en un índice
-  JSON (sin base de datos vectorial externa), helmet, express-validator,
-  express-rate-limit.
+- **Backend**: Node.js, TypeScript, Express, [Ollama](https://ollama.com)
+  (embeddings + generación local), búsqueda vectorial por similitud coseno
+  en un índice JSON (sin base de datos vectorial externa), helmet,
+  express-validator, express-rate-limit.
+- **Testing / CI**: Vitest (pruebas unitarias del retrieval + pruebas de
+  integración de la API con Supertest) y GitHub Actions (typecheck + tests
+  + build en cada push/PR).
 - **Frontend**: React 19, Vite, Tailwind CSS v4, axios.
 
 ## Estructura
 
 ```
 RAG_Assistant/
+  .github/workflows/ci.yml   typecheck + tests + build en CI
   backend/
-    docs/          documentos fuente de la base de conocimiento (Markdown)
-    scripts/ingest.js   trocea los documentos y genera sus embeddings
-    services/       cliente de Ollama + almacén vectorial
-    controllers/    lógica de chat y listado de documentos
-  frontend/         SPA en React (chat + panel de documentos)
+    docs/            documentos fuente de la base de conocimiento (Markdown)
+    src/
+      scripts/ingest.ts   trocea los documentos y genera sus embeddings
+      services/       cliente de Ollama + almacén vectorial
+      controllers/    lógica de chat y listado de documentos
+      app.ts          app de Express (sin listen, para poder testearla)
+      server.ts       punto de entrada, levanta el servidor
+    tests/            pruebas con Vitest (unitarias + integración)
+  frontend/           SPA en React (chat + panel de documentos)
 ```
 
 ## Requisitos previos
@@ -63,12 +73,24 @@ ollama pull llama3.1                       # generación de respuestas
 
 ## Backend
 
+Requiere **Node.js 20+** (el repo incluye un `.nvmrc`; si usas `nvm`, corre
+`nvm use` dentro de `backend/`).
+
 ```bash
 cd backend
 npm install
 cp .env.example .env
-npm run ingest   # trocea backend/docs/*.md y genera backend/data/vectorstore.json
-npm run dev
+npm run ingest      # trocea backend/docs/*.md y genera backend/data/vectorstore.json
+npm run dev         # levanta el servidor (TypeScript vía tsx, con recarga)
+```
+
+Otros scripts disponibles:
+
+```bash
+npm run typecheck   # tsc --noEmit
+npm test            # pruebas unitarias + integración con Vitest
+npm run build       # compila src/ (TypeScript) a dist/
+npm start           # corre la build compilada (dist/server.js)
 ```
 
 Variables de entorno (`.env`):

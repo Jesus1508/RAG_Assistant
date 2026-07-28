@@ -1,25 +1,26 @@
-require("dotenv").config();
-const fs = require("fs");
-const path = require("path");
-const { embed } = require("../services/ollama");
+import "dotenv/config";
+import fs from "node:fs";
+import path from "node:path";
+import { embed } from "../services/ollama";
+import type { Fragmento } from "../services/vectorstore";
 
-const DOCS_DIR = path.join(__dirname, "..", "docs");
-const SALIDA = path.join(__dirname, "..", "data", "vectorstore.json");
+const DOCS_DIR = path.join(__dirname, "..", "..", "docs");
+const SALIDA = path.join(__dirname, "..", "..", "data", "vectorstore.json");
 
-const trocear = (contenido) =>
+const trocear = (contenido: string): string[] =>
   contenido
     .split(/\n\s*\n/)
     .map((p) => p.replace(/^#+\s*/, "").trim())
     .filter((p) => p.length > 40);
 
-const run = async () => {
+const run = async (): Promise<void> => {
   const archivos = fs.readdirSync(DOCS_DIR).filter((f) => f.endsWith(".md"));
   if (archivos.length === 0) {
     console.error(`No se encontraron documentos .md en ${DOCS_DIR}`);
     process.exit(1);
   }
 
-  const fragmentos = [];
+  const fragmentos: Fragmento[] = [];
   let id = 1;
 
   for (const archivo of archivos) {
@@ -38,7 +39,7 @@ const run = async () => {
   console.log(`\nListo: ${fragmentos.length} fragmentos indexados en ${SALIDA}`);
 };
 
-run().catch((error) => {
+run().catch((error: Error) => {
   console.error("Error durante la ingesta:", error.message);
   process.exit(1);
 });

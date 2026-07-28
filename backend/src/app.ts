@@ -1,12 +1,10 @@
-require("dotenv").config();
+import express, { type NextFunction, type Request, type Response } from "express";
+import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
-const express = require("express");
-const cors = require("cors");
-const helmet = require("helmet");
-const rateLimit = require("express-rate-limit");
-
-const chatRoutes = require("./routes/chat");
-const documentoRoutes = require("./routes/documentos");
+import chatRoutes from "./routes/chat";
+import documentoRoutes from "./routes/documentos";
 
 const app = express();
 
@@ -15,7 +13,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       const isLocalhost = !origin || /^http:\/\/localhost:\d+$/.test(origin);
-      const isConfiguredFrontend = origin && origin === process.env.FRONTEND_URL;
+      const isConfiguredFrontend = Boolean(origin && origin === process.env.FRONTEND_URL);
       if (isLocalhost || isConfiguredFrontend) {
         return callback(null, true);
       }
@@ -33,20 +31,16 @@ const apiLimiter = rateLimit({
 });
 app.use("/api", apiLimiter);
 
-app.get("/api/health", (req, res) => {
+app.get("/api/health", (req: Request, res: Response) => {
   res.json({ success: true, message: "RAG Assistant API funcionando" });
 });
 
 app.use("/api/chat", chatRoutes);
 app.use("/api/documentos", documentoRoutes);
 
-app.use((err, req, res, next) => {
+app.use((err: Error & { status?: number }, req: Request, res: Response, next: NextFunction) => {
   console.error(err);
   res.status(err.status || 500).json({ success: false, message: err.message || "Error interno del servidor" });
 });
 
-const PORT = process.env.PORT || 4003;
-
-app.listen(PORT, () => {
-  console.log(`Servidor de RAG Assistant corriendo en el puerto ${PORT}`);
-});
+export default app;
