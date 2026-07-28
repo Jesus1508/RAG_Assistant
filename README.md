@@ -29,8 +29,32 @@ RAG_Assistant/
 
 ## Requisitos previos
 
-Necesitas [Ollama](https://ollama.com) instalado y corriendo localmente, con
-dos modelos descargados:
+Este proyecto necesita [Ollama](https://ollama.com) instalado y corriendo en
+tu máquina — es lo que reemplaza a cualquier API de pago (OpenAI, Cohere,
+etc.) para generar embeddings y respuestas.
+
+### 1. Instalar Ollama
+
+- **macOS**: descarga el instalador desde [ollama.com/download](https://ollama.com/download),
+  o con Homebrew:
+  ```bash
+  brew install ollama
+  ```
+- **Linux**:
+  ```bash
+  curl -fsSL https://ollama.com/install.sh | sh
+  ```
+- **Windows**: descarga el instalador desde [ollama.com/download](https://ollama.com/download).
+
+Después de instalarlo, asegúrate de que el servicio esté corriendo (Ollama
+suele iniciarse solo como app/servicio en segundo plano; si no, ejecuta
+`ollama serve` en una terminal aparte). Puedes verificarlo con:
+
+```bash
+curl http://127.0.0.1:11434/api/version
+```
+
+### 2. Descargar los modelos necesarios
 
 ```bash
 ollama pull embeddinggemma:300m-qat-q8_0   # embeddings
